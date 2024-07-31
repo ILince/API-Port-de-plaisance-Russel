@@ -1,0 +1,151 @@
+<div>
+  <h2>Delete Reservation</h2>
+  <!-- Form to delete a reservation -->
+  <form id="deleteReservationForm">
+    <!-- Dropdown to select a catway number for deleting a reservation -->
+    <label for="catwayIdDelete"
+      >Select a Catway Number to delete reservation (by id):</label
+    >
+    <select id="catwayIdDelete" name="catwayIdDelete" required>
+      <option value="" disabled selected>Select a Catway</option>
+    </select>
+    <br /><br />
+
+    <!-- Dropdown to select a reservation to delete -->
+    <label for="reservationId">Select a Reservation:</label><br />
+    <select id="reservationId" name="reservationId" required>
+      <option value="" disabled selected>Select a Reservation</option>
+    </select>
+    <br /><br />
+
+    <!-- Button to submit the form for deleting the selected reservation -->
+    <button type="submit">Delete Reservation</button>
+  </form>
+</div>
+
+<script>
+  // Immediately-invoked function expression (IIFE) to handle the logic for populating dropdowns and form submission
+  (async function () {
+    // Function to populate the catway dropdown
+    async function populateCatwaysSelect() {
+      try {
+        // Fetch the list of catways from the server
+        const response = await fetch("/catways");
+        if (!response.ok) throw new Error("Failed to fetch catways");
+
+        // Parse the JSON response
+        const catways = await response.json();
+        const catwaySelect = document.getElementById("catwayIdDelete");
+
+        // Clear existing options in the dropdown, keeping only the placeholder
+        catwaySelect.innerHTML =
+          '<option value="" disabled selected>Select a Catway</option>';
+
+        // Populate the dropdown with fetched catways
+        catways.forEach((catway) => {
+          const option = document.createElement("option");
+          option.value = catway._id; // Set the value to the catway ID
+          option.textContent = catway.catwayNumber; // Display the catway number
+          catwaySelect.appendChild(option);
+        });
+
+        // If catways are available, populate the reservations dropdown for the first catway
+        if (catways.length > 0) {
+          await populateReservationsSelect(catways[0]._id);
+        }
+      } catch (error) {
+        // Log and alert in case of an error fetching catways
+        console.error("Error fetching catways:", error.message);
+        alert("Error loading catways: " + error.message);
+      }
+    }
+
+    // Function to populate the reservations dropdown based on the selected catway
+    async function populateReservationsSelect(catwayId) {
+      try {
+        // Fetch the list of reservations for the selected catway from the server
+        const response = await fetch(`/reservations/${catwayId}/reservations`);
+        if (!response.ok) throw new Error("Failed to fetch reservations");
+
+        // Parse the JSON response
+        const reservations = await response.json();
+        const reservationSelect = document.getElementById("reservationId");
+
+        // Clear existing options in the dropdown, keeping only the placeholder
+        reservationSelect.innerHTML =
+          '<option value="" disabled selected>Select a Reservation</option>';
+
+        // If no reservations are available, show a "No reservations available" option
+        if (reservations.length === 0) {
+          const noReservationsOption = document.createElement("option");
+          noReservationsOption.textContent = "No reservations available";
+          reservationSelect.appendChild(noReservationsOption);
+        } else {
+          // Populate the dropdown with fetched reservations
+          reservations.forEach((reservation) => {
+            const option = document.createElement("option");
+            option.value = reservation._id; // Set the value to the reservation ID
+            option.textContent = `ID: ${reservation._id}`; // Display the reservation ID
+            reservationSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        // Log and alert in case of an error fetching reservations
+        console.error("Error fetching reservations:", error.message);
+        alert("Error loading reservations: " + error.message);
+      }
+    }
+
+    // Event listener to handle form submission
+    document
+      .getElementById("deleteReservationForm")
+      .addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+
+        // Get the selected catway ID and reservation ID from the form
+        const catwayId = document.getElementById("catwayIdDelete").value;
+        const reservationId = document.getElementById("reservationId").value;
+
+        try {
+          // Send a DELETE request to delete the selected reservation
+          const response = await fetch(
+            `/reservations/${catwayId}/reservations/${reservationId}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            // Parse and throw an error if the response is not OK
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to delete reservation");
+          }
+
+          // Show success message and reset the form
+          alert("Reservation successfully deleted");
+          console.log("Reservation deleted");
+
+          // Reset the form fields
+          document.getElementById("deleteReservationForm").reset();
+
+          // Reload the page to reflect changes
+          window.location.reload();
+        } catch (error) {
+          // Log and alert in case of an error deleting the reservation
+          console.error("Error deleting reservation:", error.message);
+          alert("Error deleting reservation: " + error.message);
+        }
+      });
+
+    // Event listener to update the reservations dropdown when the catway selection changes
+    document
+      .getElementById("catwayIdDelete")
+      .addEventListener("change", async function (event) {
+        const catwayId = event.target.value;
+        await populateReservationsSelect(catwayId);
+      });
+
+    // Call the function to populate the catway dropdown on page load
+    await populateCatwaysSelect();
+  })();
+</script>

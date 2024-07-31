@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/catways_services.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/catways_services.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Catway = require("../models/catway_model");
+
+/**
+ * Retrieves all catways from the database.
+ * @async
+ * @returns {Promise&lt;{data: Array&lt;Object>} | {error: string}>} A promise that resolves to an object containing an array of catways or an error message.
+ */
+exports.getAllCatways = async () => {
+  try {
+    const catways = await Catway.find();
+    return { data: catways };
+  } catch (error) {
+    console.error("Error in getAllCatways:", error);
+    return { error: "Internal server error" };
+  }
+};
+
+/**
+ * Retrieves only the catway numbers and their IDs from the database.
+ * @async
+ * @returns {Promise&lt;{data: Array&lt;Object>} | {error: string}>} A promise that resolves to an object containing an array of catway numbers or an error message.
+ */
+exports.getCatwayNumbers = async () => {
+  try {
+    const catways = await Catway.find({}, "catwayNumber _id");
+    return { data: catways };
+  } catch (error) {
+    console.error("Error fetching catway numbers:", error);
+    return { error: "Error fetching catway numbers" };
+  }
+};
+
+/**
+ * Retrieves a single catway by its ID.
+ * @async
+ * @param {string} id - The ID of the catway to retrieve.
+ * @returns {Promise&lt;{data: Object} | {error: string}>} A promise that resolves to an object containing the catway data if found, or an error message if not found.
+ */
+exports.getCatwayById = async (id) => {
+  try {
+    const catway = await Catway.findById(id);
+    if (!catway) {
+      return { error: "Catway not found" };
+    }
+    return { data: catway };
+  } catch (error) {
+    console.error(`Error fetching catway ${id}:`, error);
+    return { error: "Error fetching catway details" };
+  }
+};
+
+/**
+ * Adds a new catway to the database.
+ * @async
+ * @param {Object} catwayData - The data for the new catway.
+ * @returns {Promise&lt;{data: Object} | {error: string}>} A promise that resolves to an object containing the newly created catway data, or an error message if creation fails.
+ */
+exports.addCatway = async (catwayData) => {
+  try {
+    const newCatway = await Catway.create(catwayData);
+    return { data: newCatway };
+  } catch (error) {
+    console.error("Error in addCatway:", error);
+    return { error: "Error creating catway" };
+  }
+};
+
+/**
+ * Updates an existing catway by its ID.
+ * @async
+ * @param {string} id - The ID of the catway to update.
+ * @param {Object} updateData - The data to update the catway with.
+ * @returns {Promise&lt;{data: Object} | {error: string}>} A promise that resolves to an object containing the updated catway data if the update is successful, or an error message if the catway is not found or update fails.
+ */
+exports.updateCatwayById = async (id, updateData) => {
+  try {
+    const catway = await Catway.findById(id);
+    if (!catway) {
+      return { error: "Catway not found" };
+    }
+
+    Object.assign(catway, updateData);
+    await catway.save();
+    return { data: catway };
+  } catch (error) {
+    console.error("Error in updateCatwayById:", error);
+    return { error: "Error updating catway" };
+  }
+};
+
+/**
+ * Deletes a catway by its ID.
+ * @async
+ * @param {string} id - The ID of the catway to delete.
+ * @returns {Promise&lt;{data: Object} | {error: string}>} A promise that resolves to an object containing a success message if deletion is successful, or an error message if the catway is not found or deletion fails.
+ */
+exports.deleteCatwayById = async (id) => {
+  try {
+    const catway = await Catway.findById(id);
+    if (!catway) {
+      return { error: "Catway not found" };
+    }
+
+    await Catway.deleteOne({ _id: id });
+    return { data: { message: "Catway deleted successfully" } };
+  } catch (error) {
+    console.error("Error in deleteCatwayById:", error);
+    return { error: "Error deleting catway" };
+  }
+};
+
+/**
+ * Partially updates a catway's state by its ID.
+ * @async
+ * @param {string} id - The ID of the catway to update.
+ * @param {string} catwayState - The new state of the catway.
+ * @returns {Promise&lt;{data: Object} | {error: string}>} A promise that resolves to an object containing the updated catway data if the update is successful, or an error message if the catway is not found or update fails.
+ */
+exports.patchCatwayById = async (id, catwayState) => {
+  if (
+    !catwayState ||
+    typeof catwayState !== "string" ||
+    catwayState.trim() === ""
+  ) {
+    return { error: "Invalid catwayState" };
+  }
+
+  try {
+    const catway = await Catway.findByIdAndUpdate(
+      id,
+      { catwayState: catwayState.trim() },
+      { new: true }
+    );
+    if (!catway) {
+      return { error: "Catway not found" };
+    }
+    return { data: catway };
+  } catch (error) {
+    console.error("Error updating Catway:", error);
+    return { error: "Error updating Catway" };
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addCatway">addCatway</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#authenticateUser">authenticateUser</a></li><li><a href="global.html#checkJWT">checkJWT</a></li><li><a href="global.html#createReservation">createReservation</a></li><li><a href="global.html#deleteCatwayById">deleteCatwayById</a></li><li><a href="global.html#deleteResByCatwayAndId">deleteResByCatwayAndId</a></li><li><a href="global.html#deleteUserById">deleteUserById</a></li><li><a href="global.html#getAllCatways">getAllCatways</a></li><li><a href="global.html#getAllUsers">getAllUsers</a></li><li><a href="global.html#getCatwayById">getCatwayById</a></li><li><a href="global.html#getCatwayNumbers">getCatwayNumbers</a></li><li><a href="global.html#getResByCatwayAndId">getResByCatwayAndId</a></li><li><a href="global.html#getResByCatwayId">getResByCatwayId</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#patchCatwayById">patchCatwayById</a></li><li><a href="global.html#updateCatwayById">updateCatwayById</a></li><li><a href="global.html#updateUserById">updateUserById</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Wed Jul 31 2024 12:38:12 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

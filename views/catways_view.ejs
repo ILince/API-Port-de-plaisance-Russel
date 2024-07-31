@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Catways</title>
+  </head>
+
+  <body>
+    <h1>All Catways</h1>
+    <% catways.forEach(catway=> { %>
+    <ul>
+      <li>
+        <strong>Catway Number :</strong>
+        <%= catway.catwayNumber %>
+      </li>
+      <li>
+        <strong>State : </strong>
+        <%= catway.catwayState %>
+      </li>
+      <li>
+        <strong>Type : </strong>
+        <%= catway.type %>
+      </li>
+      <li><a href="/catways/view/<%= catway._id %>">View Details</a></li>
+    </ul>
+    <% }); %>
+    <a href="/dashboard">Back to Dashboard</a>
+  </body>
+</html>

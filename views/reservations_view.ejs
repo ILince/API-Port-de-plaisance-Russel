@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reservations</title>
+  </head>
+
+  <body>
+    <h1>
+      Reservations for Catway <%= reservations.length > 0 ?
+      reservations[0].catwayNumber : '' %>
+    </h1>
+    <% reservations.forEach(reservation => { %>
+    <ul>
+      <li>
+        <strong>Client:</strong>
+        <%= reservation.clientName %>
+      </li>
+      <li>
+        <strong>Check-in:</strong>
+        <%= reservation.checking %>
+      </li>
+      <li>
+        <strong>Check-out:</strong>
+        <%= reservation.checkout %>
+      </li>
+      <li>
+        <strong>Boat:</strong>
+        <%= reservation.boatName %>
+      </li>
+      <li>
+        <a href="/reservations/view/<%= reservation._id %>">View Details</a>
+      </li>
+    </ul>
+    <% }); %>
+    <a href="/dashboard">Back to Dashboard</a>
+  </body>
+</html>

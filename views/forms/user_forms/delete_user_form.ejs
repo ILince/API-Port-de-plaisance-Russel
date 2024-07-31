@@ -1,0 +1,106 @@
+<div>
+  <h2>Delete User</h2>
+
+  <!-- Form for deleting a user -->
+  <form id="deleteUserForm">
+    <!-- Dropdown to select the user to delete -->
+    <label for="deleteUserId">Select the user to delete:</label>
+    <select id="deleteUserId" name="deleteUserId" required>
+    </select>
+    <br /><br />
+
+    <button type="submit">Delete User</button>
+  </form>
+</div>
+
+<script>
+  /**
+   * Populates the user dropdown with options from the server.
+   * Fetches users and updates the dropdown element.
+   */
+  async function populateUserSelect() {
+    try {
+      // Fetch the list of users from the server
+      const response = await fetch("/users");
+
+      // Check if the response was successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Parse the JSON response
+      const users = await response.json();
+
+      // Get the dropdown element
+      const selectElement = document.getElementById("deleteUserId");
+
+      // Clear existing options
+      selectElement.innerHTML = "<option value='' disabled selected>Select a user</option>";
+
+      // Populate the dropdown with user options
+      users.forEach((user) => {
+        const option = document.createElement("option");
+        option.value = user._id;
+        option.textContent = `${user.name} (${user.email})`;
+        selectElement.appendChild(option);
+      });
+    } catch (error) {
+      // Log and alert in case of an error
+      console.error("Error retrieving users:", error.message);
+      alert("Error retrieving users");
+    }
+  }
+
+  // Populate the user dropdown when the page is loaded
+  document.addEventListener("DOMContentLoaded", populateUserSelect);
+
+  /**
+   * Handles the form submission for deleting a user.
+   * Sends a DELETE request to the server and handles the response.
+   */
+  document
+    .getElementById("deleteUserForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      // Get the selected user ID from the dropdown
+      const userId = document.getElementById("deleteUserId").value;
+
+      // Check if a user ID is selected
+      if (!userId) {
+        alert("Please select a user");
+        return;
+      }
+
+      try {
+        // Send a DELETE request to the server
+        const response = await fetch(`/users/${userId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        // Check if the response was successful
+        if (response.ok) {
+          // Parse the JSON response
+          const deletedUser = await response.json();
+          console.log("User deleted:", deletedUser);
+
+          // Notify the user of the successful deletion
+          alert("User deleted successfully!");
+
+          // Refresh the dropdown list of users
+          populateUserSelect();
+        } else {
+          // Parse and throw an error if response is not okay
+          const error = await response.json();
+          throw new Error(error.message || "Error deleting user");
+        }
+      } catch (error) {
+        // Log and alert in case of an error
+        console.error("Error:", error);
+        alert("Error deleting user: " + error.message);
+      }
+    });
+</script>

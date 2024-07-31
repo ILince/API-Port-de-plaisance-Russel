@@ -1,0 +1,83 @@
+<div>
+    <h2>Catway Detail</h2>
+    <!-- Dropdown to select a catway -->
+    <select id="catwaySelector" onchange="fetchCatwayDetails()">
+      <option value="">Select a Catway</option>
+    </select>
+  
+    <!-- div to display the details of the selected catway -->
+    <div id="catwayDetails"></div>
+  </div>
+  
+  <script>
+    /**
+     * Fetches the details of the selected catway and displays them.
+     */
+    async function fetchCatwayDetails() {
+      const catwayId = document.getElementById("catwaySelector").value;
+      if (!catwayId) return; // If no catway is selected, exit the function
+  
+      try {
+        // Sending a GET request to fetch catway details by ID
+        const response = await fetch(`/catways/detail/${catwayId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Catway details");
+        }
+        // Parsing the JSON response
+        const catway = await response.json();
+        // Displaying the catway details
+        displayCatwayDetails(catway);
+      } catch (error) {
+        // Logging and alerting any errors that occur
+        console.error("Error fetching Catway details:", error.message);
+        alert("Error fetching Catway details: " + error.message);
+      }
+    }
+  
+    /**
+     * Displays the catway details in the designated section.
+     * @param {Object} catway - The catway object containing details.
+     */
+    function displayCatwayDetails(catway) {
+      const detailsSection = document.getElementById("catwayDetails");
+      detailsSection.innerHTML = `
+        <p><strong>Catway Number:</strong> ${catway.catwayNumber}</p>
+        <p><strong>Catway State:</strong> ${catway.catwayState}</p>
+        <p><strong>Type:</strong> ${catway.type ? "Long" : "Short"}</p>
+        <p><strong>Created At:</strong> ${new Date(catway.createdAt).toLocaleString()}</p>
+        <p><strong>Updated At:</strong> ${new Date(catway.updatedAt).toLocaleString()}</p>
+      `;
+    }
+  
+    /**
+     * Fetches catway numbers and populates the dropdown menu.
+     */
+    async function fetchCatwayOptions() {
+      try {
+        // Sending a GET request to fetch all catway numbers
+        const response = await fetch("/catways/catwayNumbers");
+        if (!response.ok) {
+          throw new Error("Failed to fetch Catway numbers");
+        }
+        // Parsing the JSON response
+        const catwayNumbers = await response.json();
+        // Getting the select element
+        const selector = document.getElementById("catwaySelector");
+        // Adding an option for each catway number
+        catwayNumbers.forEach((catway) => {
+          const option = document.createElement("option");
+          option.value = catway._id;
+          option.textContent = catway.catwayNumber;
+          selector.appendChild(option);
+        });
+      } catch (error) {
+        // Logging and alerting any errors that occur
+        console.error("Error fetching Catway numbers:", error.message);
+        alert("Error fetching Catway numbers: " + error.message);
+      }
+    }
+  
+    // Fetch catway numbers when the page loads
+    fetchCatwayOptions();
+  </script>
+  

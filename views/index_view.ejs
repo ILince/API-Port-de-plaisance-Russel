@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <div>
+      <h1>Login</h1>
+      <!-- Login form for user authentication -->
+      <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+        <br />
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+        <br />
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <!-- Section providing an overview of the application -->
+    <section>
+      <h2>Application Overview</h2>
+      <p>
+        This application allows for the management of users, catways, and their
+        reservations. It is designed to simplify the process of creating,
+        deleting, and displaying data while providing a user-friendly interface.
+      </p>
+
+      <h3>Architecture</h3>
+      <ul>
+        <li>
+          <strong>Backend:</strong> Uses Node.js with Express for route handling
+          and CRUD operations.
+        </li>
+        <li><strong>Database:</strong> MongoDB for data storage.</li>
+        <li>
+          <strong>Frontend:</strong> HTML and JavaScript for creating
+          interactive forms and handling data through API calls.
+        </li>
+      </ul>
+      <a href="/docs">Documentation de l’API</a>
+
+    </section>
+
+    <script>
+      // Event listener for form submission
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+          // Prevent the default form submission behavior
+          event.preventDefault();
+
+          // Retrieve values from form fields
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            // Make a POST request to the authentication endpoint
+            const response = await fetch("/users/authenticate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            });
+
+            // Check if the response is successful
+            if (response.ok) {
+              // Parse the JSON response to get the authentication token
+              const data = await response.json();
+              const token = data.token;
+
+              // Store the token in a cookie with security attributes
+              document.cookie = `accessToken=${token}; max-age=3600; Secure; SameSite=Strict`;
+
+              // Redirect the user to the dashboard page
+              window.location.href = "/dashboard";
+            } else {
+              // Handle errors returned by the server
+              const error = await response.json();
+              console.error("Login error:", error);
+              alert("Login error: " + error.message);
+            }
+          } catch (error) {
+            // Handle network errors or other exceptions
+            console.error("Login error:", error);
+            alert("Login error: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>

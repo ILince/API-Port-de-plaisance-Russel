@@ -1,0 +1,115 @@
+<div>
+  <!-- Form to create a new reservation -->
+  <form id="createReservationForm">
+    <!-- Dropdown to select a catway number for the reservation -->
+    <label for="catwayId">Select a Catway Number for creating a reservation:</label>
+    <select id="catwayId" name="catwayId" required>
+      <option value="" disabled selected>Select a Catway</option>
+    </select>
+    <br /><br />
+
+    <!-- Input for the client's name -->
+    <label for="clientName">Client Name:</label><br />
+    <input type="text" id="clientName" name="clientName" required />
+    <br /><br />
+
+    <!-- Input for the check-in date -->
+    <label for="checking">Check-in Date:</label><br />
+    <input type="date" id="checking" name="checking" required />
+    <br /><br />
+
+    <!-- Input for the check-out date -->
+    <label for="checkout">Check-out Date:</label><br />
+    <input type="date" id="checkout" name="checkout" required />
+    <br /><br />
+
+    <!-- Input for the boat name -->
+    <label for="boatName">Boat Name:</label><br />
+    <input type="text" id="boatName" name="boatName" required />
+    <br /><br />
+
+    <!-- Button to submit the form and save the reservation -->
+    <button type="submit">Save Reservation</button>
+  </form>
+</div>
+
+<script>
+  // Function to populate the catway selection dropdown
+  async function populateCatwaysSelect() {
+    try {
+      // Fetch the list of catways from the server
+      const response = await fetch("/catways");
+      if (!response.ok) {
+        throw new Error("Failed to fetch catways");
+      }
+
+      // Parse the response JSON to get the list of catways
+      const catways = await response.json();
+      const catwaySelect = document.getElementById("catwayId");
+
+      // Clear existing options except the placeholder
+      catwaySelect.innerHTML = '<option value="" disabled selected>Select a Catway</option>';
+
+      // Populate the dropdown with the fetched catways
+      catways.forEach((catway) => {
+        const option = document.createElement("option");
+        option.value = catway._id; // Set the value attribute to the catway ID
+        option.textContent = catway.catwayNumber; // Display the catway number as the option text
+        catwaySelect.appendChild(option);
+      });
+    } catch (error) {
+      // Log and alert in case of an error fetching catways
+      console.error("Error fetching catways:", error.message);
+      alert("Error loading catways: " + error.message);
+    }
+  }
+
+  // Call the function to populate the catway selection dropdown when the page loads
+  populateCatwaysSelect();
+
+  // Add an event listener to handle form submission
+  document
+    .getElementById("createReservationForm")
+    .addEventListener("submit", async function (event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+
+      // Get the form values
+      const clientName = document.getElementById("clientName").value;
+      const checking = document.getElementById("checking").value;
+      const checkout = document.getElementById("checkout").value;
+      const boatName = document.getElementById("boatName").value;
+      const catwayId = document.getElementById("catwayId").value;
+
+      try {
+        // Send a POST request to create a new reservation
+        const response = await fetch(`/reservations/${catwayId}/reservations`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ clientName, checking, checkout, boatName }), // Send form data as JSON
+        });
+
+        // Check if the response is not OK
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to save reservation");
+        }
+
+        // Parse the response JSON
+        const result = await response.json();
+        alert("Reservation saved successfully"); // Show success message
+
+        // Reset the form
+        document.getElementById("createReservationForm").reset();
+
+        // Reload the page to reflect changes
+        window.location.reload();
+      } catch (error) {
+        // Log and alert in case of an error saving the reservation
+        console.error("Error saving reservation:", error.message);
+        alert("Error saving reservation: " + error.message);
+      }
+    });
+</script>

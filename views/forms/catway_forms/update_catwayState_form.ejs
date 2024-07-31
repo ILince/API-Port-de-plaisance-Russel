@@ -1,0 +1,99 @@
+<div>
+    <h2>Update Catway State</h2>
+    <!-- Form to update the catway state -->
+    <form id="updateCatwayForm">
+      <!-- Dropdown to select catway number -->
+      <label for="updateCatwayId">Select Catway Number:</label>
+      <select id="updateCatwayId" name="updateCatwayId" required>
+        <option value="" disabled selected>Select a Catway</option>
+      </select>
+      <br /><br />
+  
+      <label for="updateCatwayState">New Catway State:</label>
+      <input
+        type="text"
+        id="updateCatwayState"
+        name="updateCatwayState"
+        required
+      />
+      <br /><br />
+  
+      <button type="submit">Update Catway State</button>
+    </form>
+  </div>
+  
+  <script>
+    // Add event listener to the form for handling form submission
+    document
+      .getElementById("updateCatwayForm")
+      .addEventListener("submit", async function (event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+  
+        // Get the selected catway ID and new catway state from the form
+        const updateCatwayId = document.getElementById("updateCatwayId").value;
+        const updateCatwayState = document
+          .getElementById("updateCatwayState")
+          .value.trim();
+  
+        // Check if the new catway state is not empty
+        if (!updateCatwayState) {
+          alert("Catway State cannot be empty");
+          return;
+        }
+  
+        try {
+          // Send a PATCH request to the server to update the catway state
+          const response = await fetch(`/catways/${updateCatwayId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ catwayState: updateCatwayState }),
+          });
+  
+          // Check if the response is not OK
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update Catway State");
+          }
+  
+          // Parse the response from the server
+          const result = await response.json();
+          alert("Catway State updated successfully");
+          fetchCatwayNumbers(); // Refresh the dropdown
+          // Consider updating the UI to reflect changes without reloading
+          // window.location.reload(); // You might not need this
+        } catch (error) {
+          // Handle errors
+          alert("Error updating Catway State: " + error.message);
+        }
+      });
+  
+    // Function to fetch catway numbers and populate the dropdown
+    async function fetchCatwayNumbers() {
+      try {
+        // Send a GET request to fetch catway numbers
+        const response = await fetch("/catways/catwayNumbers");
+        if (!response.ok) throw new Error("Failed to fetch catway numbers");
+  
+        // Parse the response from the server
+        const catways = await response.json();
+        const selectElement = document.getElementById("updateCatwayId");
+        selectElement.innerHTML = '<option value="" disabled selected>Select a Catway</option>'; // Ensure the placeholder is preserved
+  
+        // Populate the dropdown with catway numbers
+        catways.forEach((catway) => {
+          const option = document.createElement("option");
+          option.value = catway._id;
+          option.textContent = catway.catwayNumber;
+          selectElement.appendChild(option);
+        });
+      } catch (error) {
+        // Handle errors
+        alert("Error fetching catway numbers: " + error.message);
+      }
+    }
+  
+    // Fetch catway numbers when the page loads
+    fetchCatwayNumbers();
+  </script>
+  

@@ -1,0 +1,118 @@
+<div>
+  <h2>Display Reservation Details</h2>
+  <!-- Form for selecting a reservation and displaying its details -->
+  <form id="reservationDetailsForm">
+    <!-- Dropdown menu for selecting a reservation -->
+    <label for="detailReservationId">Select a Reservation:</label><br />
+    <select id="detailReservationId" name="detailReservationId" required>
+      <option value="" disabled selected>Select a Reservation</option>
+    </select>
+    <br /><br />
+    <button type="submit">Show Details</button>
+  </form>
+  <!-- Container to display reservation details -->
+  <div id="reservationDetails"></div>
+</div>
+
+<script>
+  // Immediately-invoked function expression (IIFE) to handle reservation data and user interactions
+  (async function () {
+    // Function to populate the reservations dropdown menu
+    async function populateReservationsSelect() {
+      try {
+        // Fetch reservation data from the server
+        const response = await fetch("/reservations");
+        if (!response.ok) {
+          throw new Error("Failed to fetch reservations");
+        }
+
+        // Parse the JSON response to get reservation data
+        const reservations = await response.json();
+        const reservationSelect = document.getElementById("detailReservationId");
+
+        // Clear any existing options in the dropdown
+        reservationSelect.innerHTML = "";
+
+        // Add a placeholder option
+        const placeholderOption = document.createElement("option");
+        placeholderOption.value = "";
+        placeholderOption.textContent = "Select a Reservation";
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        reservationSelect.appendChild(placeholderOption);
+
+        // Populate the dropdown with reservation options
+        if (reservations.length === 0) {
+          // Add a message if no reservations are available
+          const noReservationsOption = document.createElement("option");
+          noReservationsOption.textContent = "No reservations available";
+          noReservationsOption.disabled = true;
+          reservationSelect.appendChild(noReservationsOption);
+        } else {
+          reservations.forEach((reservation) => {
+            const option = document.createElement("option");
+            option.value = reservation._id;
+            option.textContent = `ID: ${reservation._id} - Client: ${reservation.clientName}`;
+            reservationSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching reservations:", error.message);
+        alert("Error loading reservations: " + error.message);
+      }
+    }
+
+    // Function to display details of a selected reservation
+    async function showReservationDetails(detailReservationId) {
+      try {
+        // Fetch details of the selected reservation
+        const response = await fetch(`/reservations/${detailReservationId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch reservation details");
+        }
+
+        // Parse the JSON response to get reservation details
+        const reservation = await response.json();
+        const detailsContainer = document.getElementById("reservationDetails");
+
+        // Format dates for readability
+        const checkingDate = new Date(reservation.checking).toLocaleDateString("en-GB");
+        const checkoutDate = new Date(reservation.checkout).toLocaleDateString("en-GB");
+
+        // Generate HTML to display reservation details
+        const detailsHTML = `
+          <h3>Reservation Details</h3>
+          <p><strong>ID:</strong> ${reservation._id}</p>
+          <p><strong>Client:</strong> ${reservation.clientName}</p>
+          <p><strong>Check-in:</strong> ${checkingDate}</p>
+          <p><strong>Check-out:</strong> ${checkoutDate}</p>
+          <p><strong>Boat Name:</strong> ${reservation.boatName}</p>
+        `;
+
+        // Display the reservation details in the container
+        detailsContainer.innerHTML = detailsHTML;
+      } catch (error) {
+        console.error("Error fetching reservation details:", error.message);
+        alert("Error fetching reservation details: " + error.message);
+      }
+    }
+
+    // Set up event listener for the form submission
+    document.getElementById("reservationDetailsForm").addEventListener("submit", function (event) {
+      // Prevent default form submission
+      event.preventDefault();
+
+      // Get the selected reservation ID
+      const detailReservationId = document.getElementById("detailReservationId").value;
+      if (detailReservationId) {
+        // Show details for the selected reservation
+        showReservationDetails(detailReservationId);
+      } else {
+        alert("Please select a reservation.");
+      }
+    });
+
+    // Populate the reservations dropdown when the page loads
+    await populateReservationsSelect();
+  })();
+</script>

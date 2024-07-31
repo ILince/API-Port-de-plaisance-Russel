@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+  </head>
+
+  <body>
+    <h1>Dashboard</h1>
+
+    <!-- User Management Forms -->
+    <section>
+      <h2>User Management</h2>
+      <%- include('./forms/user_forms/create_user_form.ejs') %> <%-
+      include('./forms/user_forms/update_user_form.ejs') %> <%-
+      include('./forms/user_forms/delete_user_form.ejs') %>
+    </section>
+
+    <hr />
+
+    <!-- Catways Management Forms -->
+    <section>
+      <h2>Catways Management</h2>
+      <%- include('./forms/catway_forms/create_catway_form.ejs') %> <%-
+      include('./forms/catway_forms/update_catwayState_form.ejs') %> <%-
+      include('./forms/catway_forms/delete_catway_form.ejs') %> <%-
+      include('./forms/catway_forms/detail_catway_form.ejs') %>
+      <p>
+        <a href="/catways/view">View List of Catways</a>
+      </p>
+    </section>
+
+    <hr />
+
+    <!-- Reservations Management Forms -->
+    <section>
+      <h2>Reservation Management</h2>
+      <%- include('./forms/reservation_forms/create_reservation_form.ejs') %>
+      <%- include('./forms/reservation_forms/delete_reservation_form.ejs') %>
+      <%- include('./forms/reservation_forms/detail_reservation_form.ejs') %>
+      <p>
+        <a href="/reservations/view">View List of Reservations</a>
+      </p>
+    </section>
+
+    <hr />
+
+    <button onclick="logout()">Logout</button>
+    <script>
+      function logout() {
+        // Clear the access token cookie
+        document.cookie =
+          "accessToken=; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; SameSite=Strict";
+
+        window.location.href = "/";
+      }
+    </script>
+  </body>
+</html>

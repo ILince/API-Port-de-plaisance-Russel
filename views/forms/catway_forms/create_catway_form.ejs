@@ -1,0 +1,79 @@
+<div>
+    <h2>Add a New Catway</h2>
+    <!-- Form to add a new catway -->
+    <form id="addCatwayForm">
+      <label for="addCatwayNumber">Catway Number:</label>
+      <input type="text" id="addCatwayNumber" name="addCatwayNumber" required />
+      <br /><br />
+  
+      <label for="addCatwayState">Catway State:</label>
+      <input type="text" id="addCatwayState" name="addCatwayState" required />
+      <br /><br />
+  
+      <!-- Dropdown for catway type -->
+      <label for="addType">Type:</label>
+      <select id="addType" name="addType" required>
+        <option value="" disabled selected>Select type</option>
+        <option value="true">Long</option>
+        <option value="false">Short</option>
+      </select>
+      <br /><br />
+  
+      <button type="submit">Add Catway</button>
+    </form>
+  </div>
+  
+  <script>
+    /**
+     * Handles the form submission for adding a new catway.
+     * Prevents default form submission behavior, sends a POST request,
+     * and handles the response.
+     */
+    document
+      .getElementById("addCatwayForm")
+      .addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent the default form submission
+  
+        // Retrieve values from the form fields
+        const catwayNumber = document.getElementById("addCatwayNumber").value.trim();
+        const catwayState = document.getElementById("addCatwayState").value.trim();
+        const type = document.getElementById("addType").value;
+  
+        // Basic client-side validation
+        if (!catwayNumber || !catwayState || !type) {
+          alert("All fields are required.");
+          return;
+        }
+  
+        try {
+          // Send a POST request to add a new catway
+          const response = await fetch("/catways", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ catwayNumber, catwayState, type }),
+          });
+  
+          // Check if the response was successful
+          if (response.ok) {
+            const result = await response.json();
+            console.log("New catway added:", result);
+            alert("Catway added successfully!");
+            // Reset the form after successful submission
+            document.getElementById("addCatwayForm").reset();
+            // Optionally, reload the page to reflect the new data
+            window.location.reload();
+          } else {
+            // Handle errors if the response is not OK
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Error adding catway");
+          }
+        } catch (error) {
+          // Log and display errors
+          console.error("Error:", error);
+          alert("Error adding catway: " + error.message);
+        }
+      });
+  </script>
+  
